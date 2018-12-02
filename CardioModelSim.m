@@ -1,5 +1,6 @@
 sModelParams = CardioModelParams;
 sSimParams.ts = 1e-3; % [sec]
+sSimParams.simDuration = 30; % [sec]
 
 %% set initial values:
 totalVol = sModelParams.totalBloodVolume;
@@ -8,14 +9,22 @@ randVolumes = rand(6,1);
 randVolumes = randVolumes ./ sum(randVolumes);
 randVolumes = randVolumes .* totalVol;
 
-sStateVec.sVolumes.Vpa = randVolumes(1);
-sStateVec.sVolumes.Vpu = randVolumes(2);
-sStateVec.sVolumes.Vlv = randVolumes(3);
-sStateVec.sVolumes.Vao = randVolumes(4);
-sStateVec.sVolumes.Vvc = randVolumes(5);
-sStateVec.sVolumes.Vrv = randVolumes(6);
+sStateVecInit.sVolumes.Vpa = randVolumes(1);
+sStateVecInit.sVolumes.Vpu = randVolumes(2);
+sStateVecInit.sVolumes.Vlv = randVolumes(3);
+sStateVecInit.sVolumes.Vao = randVolumes(4);
+sStateVecInit.sVolumes.Vvc = randVolumes(5);
+sStateVecInit.sVolumes.Vrv = randVolumes(6);
 
-sStateVec.sValves.aortic        = false;
-sStateVec.sValves.pulmunary     = false;
-sStateVec.sValves.mitral        = false;
-sStateVec.sValves.tricuspid     = false;
+sStateVecInit.sValves.aortic        = false;
+sStateVecInit.sValves.pulmunary     = false;
+sStateVecInit.sValves.mitral        = false;
+sStateVecInit.sValves.tricuspid     = false;
+
+sStateVecInit.sFlows.Qav = 0;
+sStateVecInit.sFlows.Qpv = 0;
+
+%% allocate:
+sStateVec = sStateVecInit;
+nIter = sSimParams.simDuration / sSimParams.ts;
+[sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFuncVal,sModelParams,sSimParams);
