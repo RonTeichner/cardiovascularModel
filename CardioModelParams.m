@@ -19,8 +19,17 @@ sModelParams.sDriverFunc.vals = sum(driveMat,1);
 sModelParams.heartRate = 80; % [beats@min]
 
 sModelParams.A = [1 -1 0 0 0 0 ; 0 1 -1 0 0 0 ; 0 0 1 -1 0 0 ; 0 0 0 1 -1 0 ; 0 0 0 0 1 -1 ; -1 0 0 0 0 1];
-
+sModelParams.totalBloodVolume = 5.5; %[liter]
 sModelParams.Ppl = -4; % [mmHg]
+
+sModelParams.Rsys = 140;
+sModelParams.Rmt = 0.06;
+sModelParams.Rav = 1.4;
+sModelParams.Rtc = 0.18;
+sModelParams.Rpv = 0.48;
+sModelParams.Rpul = 19;
+
+sModelParams.Lav = 1e-6;
 
 sModelParams.sLvf.P0        = 0.17;
 sModelParams.sLvf.lambda    = 15;
@@ -55,4 +64,3 @@ sModelParams.sPu.Ees       = 0.8;
 
 sModelParams.sAo.Vd        = 0.8;
 sModelParams.sAo.Ees       = 94;
-

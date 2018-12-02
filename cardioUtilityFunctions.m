@@ -9,6 +9,8 @@ switch funcSym
     case 'g'
         val = sInputs.e*sFuncParams.Ees*(sInputs.V - sFuncParams.Vd) + (1-sInputs.e)*cardioUtilityFunctions('f',sInputs,sFuncParams);
     case 'h'
+        w = exp(-sFuncParams.R/sFuncParams.L*sFuncParams.ts);
+        val = w*sInputs.Q + (1-w)*((sInputs.P1 - sInputs.P2)/sFuncParams.R);
 end
 
 
