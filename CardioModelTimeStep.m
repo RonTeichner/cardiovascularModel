@@ -36,7 +36,7 @@ function [sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFu
 
 %% Calc chamber volumes:
 V = [sStateVec.sVolumes.Vpa; sStateVec.sVolumes.Vpu; sStateVec.sVolumes.Vlv; sStateVec.sVolumes.Vao; sStateVec.sVolumes.Vvc; sStateVec.sVolumes.Vrv];
-Q = [sFlows.Qpu; sFlows.Qpul; sFlows.Qmt; sFlows.Qav; sFlows.Qsys; sFlows.Qtc];
+Q = [sFlows.Qpv; sFlows.Qpul; sFlows.Qmt; sFlows.Qav; sFlows.Qsys; sFlows.Qtc];
 
 V = V + sSimParams.ts * (sModelParams.A * Q);
 

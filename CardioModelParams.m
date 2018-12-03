@@ -12,9 +12,12 @@ driveMat = zeros(sModelParams.sDriverFunc.params.n , numel(sModelParams.sDriverF
 for i = 1:sModelParams.sDriverFunc.params.n
     driveMat(i,:) = sModelParams.sDriverFunc.params.aVec(i) * exp(-sModelParams.sDriverFunc.params.bVec(i) * (sModelParams.sDriverFunc.tVec - sModelParams.sDriverFunc.params.cVec(i)).^2);
 end
-
-
 sModelParams.sDriverFunc.vals = sum(driveMat,1);
+[~,maxIdx] = max(sModelParams.sDriverFunc.vals);
+maxTime = sModelParams.sDriverFunc.tVec(maxIdx);
+sModelParams.sDriverFunc.tVec = sModelParams.sDriverFunc.tVec - maxTime;
+
+%figure; plot(sModelParams.sDriverFunc.tVec, sModelParams.sDriverFunc.vals); xlabel('sec'); grid on;
 
 sModelParams.heartRate = 80; % [beats@min]
 
@@ -30,6 +33,7 @@ sModelParams.Rpv = 0.48;
 sModelParams.Rpul = 19;
 
 sModelParams.Lav = 1e-6;
+sModelParams.Lpv = 1e-6;
 
 sModelParams.sLvf.P0        = 0.17;
 sModelParams.sLvf.lambda    = 15;
