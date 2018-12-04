@@ -35,40 +35,39 @@ function [sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFu
     sModelParams, sSimParams);
 
 %% Calc chamber volumes:
-V = [sStateVec.sVolumes.Vpa; sStateVec.sVolumes.Vpu; sStateVec.sVolumes.Vlv; sStateVec.sVolumes.Vao; sStateVec.sVolumes.Vvc; sStateVec.sVolumes.Vrv];
-Q = [sFlows.Qpv; sFlows.Qpul; sFlows.Qmt; sFlows.Qav; sFlows.Qsys; sFlows.Qtc];
+V = [sStateVec.sVolumes.Vpa; sStateVec.sVolumes.Vpu; sStateVec.sVolumes.Vlv; sStateVec.sVolumes.Vao; sStateVec.sVolumes.Vvc; sStateVec.sVolumes.Vrv]; % [l]
+Q = [sFlows.Qpv; sFlows.Qpul; sFlows.Qmt; sFlows.Qav; sFlows.Qsys; sFlows.Qtc]; % [l/s]
 
 V = V + sSimParams.ts * (sModelParams.A * Q);
 
 %% Update state vec:
-sUpdatedStateVec.sVolumes.Vpa = V(1);
-sUpdatedStateVec.sVolumes.Vpu = V(2);
-sUpdatedStateVec.sVolumes.Vlv = V(3);
-sUpdatedStateVec.sVolumes.Vao = V(4);
-sUpdatedStateVec.sVolumes.Vvc = V(5);
-sUpdatedStateVec.sVolumes.Vrv = V(6);
+sUpdatedStateVec.sVolumes.Vpa = V(1); % [l]
+sUpdatedStateVec.sVolumes.Vpu = V(2); % [l]
+sUpdatedStateVec.sVolumes.Vlv = V(3); % [l]
+sUpdatedStateVec.sVolumes.Vao = V(4); % [l]
+sUpdatedStateVec.sVolumes.Vvc = V(5); % [l]
+sUpdatedStateVec.sVolumes.Vrv = V(6); % [l]
 
 sUpdatedStateVec.sValves = sValves;
 
-sUpdatedStateVec.sFlows.Qav = sFlows.Qav;
-sUpdatedStateVec.sFlows.Qpv = sFlows.Qpv;
+sUpdatedStateVec.sFlows.Qav = sFlows.Qav; % [l/s]
+sUpdatedStateVec.sFlows.Qpv = sFlows.Qpv; % [l/s]
 
 %% Update all info vec:
-sAllInfoVec.sVolumes.Vpa = V(1);
-sAllInfoVec.sVolumes.Vpu = V(2);
-sAllInfoVec.sVolumes.Vlv = V(3);
-sAllInfoVec.sVolumes.Vao = V(4);
-sAllInfoVec.sVolumes.Vvc = V(5);
-sAllInfoVec.sVolumes.Vrv = V(6);
-sAllInfoVec.sVolumes.Vspt = sVolumes.Vspt;
-sAllInfoVec.sVolumes.Vlvf = sVolumes.Vlvf;
-sAllInfoVec.sVolumes.Vrvf = sVolumes.Vrvf;
+sAllInfoVec.sVolumes.Vpa = V(1); % [l]
+sAllInfoVec.sVolumes.Vpu = V(2); % [l]
+sAllInfoVec.sVolumes.Vlv = V(3); % [l]
+sAllInfoVec.sVolumes.Vao = V(4); % [l]
+sAllInfoVec.sVolumes.Vvc = V(5); % [l]
+sAllInfoVec.sVolumes.Vrv = V(6); % [l]
+sAllInfoVec.sVolumes.Vspt = sVolumes.Vspt; % [l]
+sAllInfoVec.sVolumes.Vlvf = sVolumes.Vlvf; % [l]
+sAllInfoVec.sVolumes.Vrvf = sVolumes.Vrvf; % [l]
 
-sAllInfoVec.sPressures = sPressures;
+sAllInfoVec.sPressures = sPressures; % [mmHg]
 
 sAllInfoVec.sValves = sValves;
 
-sAllInfoVec.sFlows = sFlows;
+sAllInfoVec.sFlows = sFlows;  % [l/s]
 
 end
-
