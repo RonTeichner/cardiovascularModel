@@ -1,4 +1,4 @@
-function [sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFuncVal,sModelParams,sSimParams)
+function [sUpdatedStateVec,sAllInfoVec,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,sModelParams,sSimParams)
 % function [sUpdatedStateVec] = CardioModelTimeStep(sStateVec,sParams)
 % This function propagates the Cardiovascular model by a single time-step
 
@@ -16,8 +16,11 @@ function [sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFu
 % sUpdatedStateVec - identical to input sStateVec
 % sAllInfoVec - a vector containing all model parameters values. Those that
 %   are contained in state vec and those that are internal parameters that are not needed for future model propagation 
+% cardioErr - numerically Vspt was not found
 %
 % Ron Teichner, 28.11.2018
+
+cardioErr = false;
 
 %% Calc Ventricles Pressures
 [sPressures.Plv, sPressures.Prv, sPressures.Pperi, sPressures.Plvf, sPressures.Prvf,...
@@ -25,6 +28,10 @@ function [sUpdatedStateVec,sAllInfoVec] = CardioModelTimeStep(sStateVec,driverFu
     CalcVentriclesPressures(driverFuncVal, sStateVec.sVolumes.Vlv, sStateVec.sVolumes.Vrv,...
     sModelParams, sSimParams);
 
+if numel(sVolumes.Vspt)==0
+    [sUpdatedStateVec,sAllInfoVec,cardioErr] = deal([],[],true);
+    return
+end
 %% Calc Peripheral Pressures
 [sPressures.Pao, sPressures.Pvc, sPressures.Ppa, sPressures.Ppu] = ...
     CalcPeripheralPressures(sStateVec.sVolumes.Vao, sStateVec.sVolumes.Vvc, sStateVec.sVolumes.Vpa,...

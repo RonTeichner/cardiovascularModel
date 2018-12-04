@@ -1,7 +1,8 @@
 function sModelParams = CardioModelParams()
 
 sModelParams.mmHg_to_Pa = 133.322387415; % 1[mmHg] = 133.322387415[Pa]
-sModelParams.mmHg_to_kPa = 0.133322387415; % 1[mmHg] = 0.133322387415[kPa]
+sModelParams.Pa_to_mmHg = 1/sModelParams.mmHg_to_Pa;
+sModelParams.mmHg_to_kPa = sModelParams.mmHg_to_Pa/1e3;
 
 sModelParams.sDriverFunc.ts = 1e-3; % [sec]
 sModelParams.sDriverFunc.params.aVec = 1;
