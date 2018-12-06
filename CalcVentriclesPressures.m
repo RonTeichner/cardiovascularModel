@@ -30,31 +30,10 @@ funcSym = 'f'; sInputs.V = (Vlv+Vrv); [sFuncParams.P0, sFuncParams.lambda, sFunc
 Pperi = sModelParams.Pa_to_mmHg*1e3*cardioUtilityFunctions(funcSym,sInputs,sFuncParams) + sModelParams.Ppl; % [mmHg]
 % 'f' function has units of [kPa]
 
-[Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(isempty(previousVspt),previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams);
+useMatlabSolver = isempty(previousVspt);
+[Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams);
 
-%% graphical investigation of numeric solution:
-if enableVsptFigure
-    maxPressuretoDisplay = 200; minPressuretoDisplay = -10; % [mmHg]
-    VsptVals = 0:10e-6:20e-3;
-    PsptVals = sModelParams.Pa_to_mmHg * 1e3*double(subs(PsptSym,VsptSym,VsptVals)); PsptValsIdx = (PsptVals < maxPressuretoDisplay) & (PsptVals > minPressuretoDisplay);
-    PlvfVals = sModelParams.Pa_to_mmHg * 1e3*double(subs(PlvfSym,VsptSym,VsptVals)); PlvfValsIdx = (PlvfVals < maxPressuretoDisplay) & (PlvfVals > minPressuretoDisplay);
-    PrvfVals = sModelParams.Pa_to_mmHg * 1e3*double(subs(PrvfSym,VsptSym,VsptVals)); PrvfValsIdx = (PrvfVals < maxPressuretoDisplay) & (PrvfVals > minPressuretoDisplay);
-    
-    PlvfValsIdx = PlvfValsIdx & PrvfValsIdx;
-    PrvfValsIdx = PlvfValsIdx & PrvfValsIdx;
-    
-    figure;
-    plot(VsptVals(PsptValsIdx),PsptVals(PsptValsIdx)); hold all;
-    plot(VsptVals(PlvfValsIdx),PlvfVals(PlvfValsIdx) - PrvfVals(PrvfValsIdx));
-    
-    if Vspt > 0
-        [~,VsptIdx] = min(abs(VsptVals - Vspt));
-        plot(VsptVals(VsptIdx),PsptVals(VsptIdx),'o'); hold all;
-        plot(VsptVals(VsptIdx),PlvfVals(VsptIdx) - PrvfVals(VsptIdx),'x');
-    end
-    
-    xlabel('[l]'); ylabel('[mmHg]'); legend('Pspt Vs Vspt','(Plvf-Prvf) Vs Vspt'); title('numeric solution search'); grid on;
-end
+
 %% continue with calculations:
 if numel(Vspt) == 0
     display('CalcVentriclesPressures: no solution found for Vspt');
@@ -74,7 +53,7 @@ Prv = Prvf + Pperi; % [mmHg]
 
 end
 
-function [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams)
+function [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams)
 switch useMatlabSolver
     case true
         debugVsptSolDiff = NaN;
@@ -101,28 +80,77 @@ switch useMatlabSolver
         Pspt = double(subs(PsptSym, VsptSym, Vspt)); % [kPa]
     case false
         VsptValsLimits = 0.5e-3*[-1,1] + previousVspt; % [l]
-        VsptVals = VsptValsLimits(1) : 10e-6 : VsptValsLimits(2);
+        VsptVals = VsptValsLimits(1) : 0.01e-6 : VsptValsLimits(2);
         
         VlvfVals = Vlv + VsptVals; % [l]
         VrvfVals = Vrv - VsptVals; % [l]
         
         funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VsptVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
         PsptVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-             
+        
         funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VlvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
         PlvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-                
+        
         funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VrvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
         PrvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-                
+        
         [debugVsptSolDiff,solutionIdx] = min(abs(PsptVals - (PlvfVals-PrvfVals)));
+        Vspt = VsptVals(solutionIdx);
+        
         debugVsptSolDiff = sModelParams.Pa_to_mmHg * 1e3*debugVsptSolDiff; % [mmHg]
-        if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax
-            Vspt = VsptVals(solutionIdx);
-            [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PlvfVals(solutionIdx),PsptVals(solutionIdx));            
+        if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax            
+            [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PlvfVals(solutionIdx),PsptVals(solutionIdx));
         else
-            [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(true,previousVspt,Vlv,Vrv,driverFuncVal,sModelParams);            
+            [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(true,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams);
         end
 end
+
+%% graphical investigation of numeric solution:
+if enableVsptFigure
+    maxPressuretoDisplay = 200; minPressuretoDisplay = -10; % [mmHg]
+    VsptRes = 1e-6; % [l]
+    VsptVals = 0:VsptRes:20e-3;
+    VlvfVals = Vlv + VsptVals; % [l]
+    VrvfVals = Vrv - VsptVals; % [l]
+    
+    funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VsptVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
+    PsptVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+    
+    funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VlvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
+    PlvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+    
+    funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VrvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
+    PrvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+    
+    
+    PsptValsIdx = (PsptVals < maxPressuretoDisplay) & (PsptVals > minPressuretoDisplay);
+    PlvfValsIdx = (PlvfVals < maxPressuretoDisplay) & (PlvfVals > minPressuretoDisplay);
+    PrvfValsIdx = (PrvfVals < maxPressuretoDisplay) & (PrvfVals > minPressuretoDisplay);
+    
+    PlvfValsIdx = PlvfValsIdx & PrvfValsIdx;
+    PrvfValsIdx = PlvfValsIdx & PrvfValsIdx;
+    
+    figure;
+    subplot(2,1,1);
+    plot(VsptVals(PsptValsIdx),PsptVals(PsptValsIdx)); hold all;
+    plot(VsptVals(PlvfValsIdx),PlvfVals(PlvfValsIdx) - PrvfVals(PrvfValsIdx));
+    
+    if Vspt > 0
+        [~,VsptIdx] = min(abs(VsptVals - Vspt));
+        plot(VsptVals(VsptIdx),PsptVals(VsptIdx),'o'); hold all;
+        plot(VsptVals(VsptIdx),PlvfVals(VsptIdx) - PrvfVals(VsptIdx),'x');
+    end
+    
+    xlabel('[l]'); ylabel('[mmHg]'); legend('Pspt Vs Vspt','(Plvf-Prvf) Vs Vspt'); title('numeric solution search'); grid on;
+    
+    subplot(2,1,2);
+    PsptValsIdx = PsptValsIdx & PlvfValsIdx;
+    PlvfValsIdx = PlvfValsIdx & PsptValsIdx;
+    PrvfValsIdx = PrvfValsIdx & PsptValsIdx;
+    errVsptFig = abs(PsptVals(PsptValsIdx) - (PlvfVals(PlvfValsIdx) - PrvfVals(PrvfValsIdx)));
+    plot(VsptVals(PsptValsIdx) , errVsptFig);
+    xlabel('[l]'); ylabel('[mmHg]'); title('numeric solution search err'); grid on;
+end
+
 end
 

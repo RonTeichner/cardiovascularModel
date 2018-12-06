@@ -1,6 +1,12 @@
-function CardioPlots(sAllInfoVec,lastIter)
+function CardioPlots(sAllInfoVec,lastIter,xlabelMethod)
 
-tVec = sAllInfoVec.tVec(1:lastIter);
+switch xlabelMethod
+    case 'sec'
+        tVec = sAllInfoVec.tVec(1:lastIter);
+    case 'samples'
+        tVec = 1:lastIter;
+end
+
 figure; 
 subplot(2,1,1); plot(tVec,sAllInfoVec.driverFuncVal(1:lastIter)); xlabel('sec'); title('driverFunc e(t)'); grid on;
 subplot(2,1,2); plot(tVec,sAllInfoVec.sVolumes.totalBloodVol(1:lastIter)); xlabel('sec'); ylabel('l'); title('total blood vol'); grid on;
@@ -35,8 +41,8 @@ subplot(2,3,5); plot(tVec,sAllInfoVec.sVolumes.Vrvf(1:lastIter)./1e-3); xlabel('
 subplot(2,3,6); plot(tVec,sAllInfoVec.sVolumes.Vspt(1:lastIter)./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt'); grid on;
 
 figure; 
-subplot(2,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;
-subplot(2,1,2); plot(tVec,[0;diff(sAllInfoVec.sVolumes.Vspt)]./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt solution diff'); grid on;
+subplot(2,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff(1:lastIter)); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;
+subplot(2,1,2); plot(tVec,[0;diff(sAllInfoVec.sVolumes.Vspt(1:lastIter))]./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt solution diff'); grid on;
 
 figure; 
 subplot(2,3,1); plot(tVec,sAllInfoVec.sFlows.Qsys(1:lastIter)); xlabel('sec'); ylabel('l/s'); title('Qsys'); grid on;

@@ -2,9 +2,13 @@ clear all; close all; clc;
 dbstop if error
 
 sModelParams = CardioModelParams;
-sSimParams.ts = 1e-3; % [sec]
-sSimParams.simDuration = 60; % [sec]
+sSimParams.ts = 0.1e-3; % [sec]
+sSimParams.simDuration = 2; % [sec]
 sSimParams.VsptSolutionDiffMax = 2; % [mmHg]
+sSimParams.seed = round(rand*1e6);
+
+rng(sSimParams.seed);
+%rng(832713);
 %% allocate:
 nIter = round(sSimParams.simDuration / sSimParams.ts);
 sAllInfoVec = CardioAllocate(nIter);
@@ -21,13 +25,15 @@ while lastIter < 10
     sStateVecInit = CardioSimInit(sModelParams,sSimParams);
     sStateVec = sStateVecInit;
     for i = 1:nIter
-        display(['iter: ',int2str(i),' out of ',int2str(nIter)])
+        if ~mod(i,100)
+            display(['iter: ',int2str(i),' out of ',int2str(nIter)])
+        end
         % driverFunc value:
         currentTime = sAllInfoVec.tVec(i);
         [~,closestCenterIdx] = min(abs(driverFuncCenters - currentTime));
         closestCenterTime = driverFuncCenters(closestCenterIdx);
         diffFromCenter = currentTime - closestCenterTime; % [sec]
-        diffFromCenterAtIdx = round(diffFromCenter*sModelParams.sDriverFunc.ts);
+        diffFromCenterAtIdx = round(diffFromCenter/sModelParams.sDriverFunc.ts);
         desiredIdx = sModelParams.sDriverFunc.centerIdx + diffFromCenterAtIdx;
         desiredIdx = min(desiredIdx , numel(sModelParams.sDriverFunc.tVec));
         desiredIdx = max(desiredIdx , 1);
@@ -60,4 +66,5 @@ while lastIter < 10
     end
 end
 %% analyse:
-CardioPlots(sAllInfoVec,lastIter);
+%CardioPlots(sAllInfoVec,lastIter,'samples');
+CardioPlots(sAllInfoVec,lastIter,'sec');
