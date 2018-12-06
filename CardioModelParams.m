@@ -4,7 +4,7 @@ sModelParams.mmHg_to_Pa = 133.322387415; % 1[mmHg] = 133.322387415[Pa]
 sModelParams.Pa_to_mmHg = 1/sModelParams.mmHg_to_Pa;
 sModelParams.mmHg_to_kPa = sModelParams.mmHg_to_Pa/1e3;
 
-sModelParams.sDriverFunc.ts = 1e-3; % [sec]
+sModelParams.sDriverFunc.ts = 1e-6; % [sec]
 sModelParams.sDriverFunc.params.aVec = 1;
 sModelParams.sDriverFunc.params.bVec = 80;
 sModelParams.sDriverFunc.params.cVec = 0.27;
@@ -18,14 +18,23 @@ end
 sModelParams.sDriverFunc.vals = sum(driveMat,1); % [no-units]
 [~,maxIdx] = max(sModelParams.sDriverFunc.vals);
 maxTime = sModelParams.sDriverFunc.tVec(maxIdx);
+sModelParams.sDriverFunc.centerIdx = maxIdx;
 sModelParams.sDriverFunc.tVec = sModelParams.sDriverFunc.tVec - maxTime;
+
+sModelParams.sDriverFunc.tVec = [sModelParams.sDriverFunc.tVec(1) - sModelParams.sDriverFunc.ts , sModelParams.sDriverFunc.tVec , sModelParams.sDriverFunc.tVec(end) + sModelParams.sDriverFunc.ts];
+sModelParams.sDriverFunc.vals = [0 , sModelParams.sDriverFunc.vals , 0];
+sModelParams.sDriverFunc.centerIdx = sModelParams.sDriverFunc.centerIdx + 1;
 
 %figure; plot(sModelParams.sDriverFunc.tVec, sModelParams.sDriverFunc.vals); xlabel('sec'); grid on;
 
 sModelParams.heartRate = 80; % [beats@min]
 
 sModelParams.A = [1 -1 0 0 0 0 ; 0 1 -1 0 0 0 ; 0 0 1 -1 0 0 ; 0 0 0 1 -1 0 ; 0 0 0 0 1 -1 ; -1 0 0 0 0 1];
+
+% one of the folowwing total blood volume should be used:
 sModelParams.totalBloodVolume = 5.5; %[liter] = [l]
+sModelParams.stressedBloodVolume = 1.5; %[liter] = [l]
+
 sModelParams.Ppl = -4; % [mmHg]
 
 sModelParams.Rsys = 140; % [KPa*s/l]
@@ -35,8 +44,8 @@ sModelParams.Rtc = 0.18; % [KPa*s/l]
 sModelParams.Rpv = 0.48; % [KPa*s/l]
 sModelParams.Rpul = 19;  % [KPa*s/l] 
 
-sModelParams.Lav = 1e-6; % [KPa*s^2/l]
-sModelParams.Lpv = 1e-6; % [KPa*s^2/l]
+sModelParams.Lav = 1e-6 * sModelParams.mmHg_to_Pa; % [KPa*s^2/l]
+sModelParams.Lpv = 1e-6 * sModelParams.mmHg_to_Pa; % [KPa*s^2/l]
 
 sModelParams.sLvf.P0        = 0.17; % [KPa]
 sModelParams.sLvf.lambda    = 15;   % [1/l]

@@ -9,10 +9,12 @@ sAllInfoVec.sVolumes.Vrv = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vspt = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vlvf = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vrvf = zeros(nIter,1);
+sAllInfoVec.sVolumes.totalBloodVol = zeros(nIter,1);
 
 sAllInfoVec.sPressures.Plv = zeros(nIter,1);
 sAllInfoVec.sPressures.Prv = zeros(nIter,1);
 sAllInfoVec.sPressures.Pperi = zeros(nIter,1);
+sAllInfoVec.sPressures.Pspt = zeros(nIter,1);
 sAllInfoVec.sPressures.Plvf = zeros(nIter,1);
 sAllInfoVec.sPressures.Prvf = zeros(nIter,1);
 sAllInfoVec.sPressures.Pao = zeros(nIter,1);

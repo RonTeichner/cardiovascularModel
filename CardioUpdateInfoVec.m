@@ -9,10 +9,13 @@ sAllInfoVec.sVolumes.Vrv(i) = sAllInfoVecCurrentTime.sVolumes.Vrv;
 sAllInfoVec.sVolumes.Vspt(i) = sAllInfoVecCurrentTime.sVolumes.Vspt;
 sAllInfoVec.sVolumes.Vlvf(i) = sAllInfoVecCurrentTime.sVolumes.Vlvf;
 sAllInfoVec.sVolumes.Vrvf(i) = sAllInfoVecCurrentTime.sVolumes.Vrvf;
+sAllInfoVec.sVolumes.debugVsptSolDiff(i) = sAllInfoVecCurrentTime.sVolumes.debugVsptSolDiff;
+sAllInfoVec.sVolumes.totalBloodVol(i) = sAllInfoVec.sVolumes.Vpa(i) + sAllInfoVec.sVolumes.Vpu(i) + sAllInfoVec.sVolumes.Vlv(i) + sAllInfoVec.sVolumes.Vao(i) + sAllInfoVec.sVolumes.Vvc(i) + sAllInfoVec.sVolumes.Vrv(i);
 
 sAllInfoVec.sPressures.Plv(i) = sAllInfoVecCurrentTime.sPressures.Plv;
 sAllInfoVec.sPressures.Prv(i) = sAllInfoVecCurrentTime.sPressures.Prv;
 sAllInfoVec.sPressures.Pperi(i) = sAllInfoVecCurrentTime.sPressures.Pperi;
+sAllInfoVec.sPressures.Pspt(i) = sAllInfoVecCurrentTime.sPressures.Pspt;
 sAllInfoVec.sPressures.Plvf(i) = sAllInfoVecCurrentTime.sPressures.Plvf;
 sAllInfoVec.sPressures.Prvf(i) = sAllInfoVecCurrentTime.sPressures.Prvf;
 sAllInfoVec.sPressures.Pao(i) = sAllInfoVecCurrentTime.sPressures.Pao;
