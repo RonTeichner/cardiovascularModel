@@ -40,7 +40,7 @@ end
 
 %% Calc Flows and valves state
 [sFlows, sValves] = CalcFlowsValves(sPressures, sStateVec.sValves, sStateVec.sFlows.Qav, sStateVec.sFlows.Qpv,...
-    sModelParams, sSimParams);
+    sStateVec.sVolumes, sModelParams, sSimParams);
 
 %% Calc chamber volumes:
 V = [sStateVec.sVolumes.Vpa; sStateVec.sVolumes.Vpu; sStateVec.sVolumes.Vlv; sStateVec.sVolumes.Vao; sStateVec.sVolumes.Vvc; sStateVec.sVolumes.Vrv]; % [l]

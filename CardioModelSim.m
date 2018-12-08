@@ -1,11 +1,14 @@
-clear all; close all; clc; 
+clear all; close all; clc;
 dbstop if error
 
 sModelParams = CardioModelParams;
-sSimParams.ts = 0.1e-3; % [sec]
-sSimParams.simDuration = 2; % [sec]
+sSimParams.ts = 0.5e-3; % [sec]
+sSimParams.simDuration = 30; % [sec]
 sSimParams.VsptSolutionDiffMax = 2; % [mmHg]
 sSimParams.seed = round(rand*1e6);
+sSimParams.initMethod = 'random'; % {'random','endDiastolic','endTenMinNoDriver'}
+sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step will not be greater than the whole chamber volume
+heartOn = true;
 
 rng(sSimParams.seed);
 %rng(832713);
@@ -18,11 +21,11 @@ sAllInfoVec.driverFuncVal = zeros(nIter,1);
 heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 % constant heart beat:
 driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
-%% runSim: 
+%% runSim:
 lastIter = 1;
 while lastIter < 10
-    display('sim starts')    
-    sStateVecInit = CardioSimInit(sModelParams,sSimParams);
+    display('sim starts')
+    sStateVecInit = CardioSimInit(sSimParams.initMethod,sModelParams,sSimParams);
     sStateVec = sStateVecInit;
     for i = 1:nIter
         if ~mod(i,100)
@@ -37,11 +40,15 @@ while lastIter < 10
         desiredIdx = sModelParams.sDriverFunc.centerIdx + diffFromCenterAtIdx;
         desiredIdx = min(desiredIdx , numel(sModelParams.sDriverFunc.tVec));
         desiredIdx = max(desiredIdx , 1);
-        driverFuncVal = sModelParams.sDriverFunc.vals(desiredIdx);
-%         driverFuncVal = interp1(sModelParams.sDriverFunc.tVec , sModelParams.sDriverFunc.vals , diffFromCenter,'linear');
-%         if isnan(driverFuncVal)
-%             driverFuncVal = 0;
-%         end
+        if heartOn
+            driverFuncVal = sModelParams.sDriverFunc.vals(desiredIdx);
+        else
+            driverFuncVal = 0;
+        end
+        %         driverFuncVal = interp1(sModelParams.sDriverFunc.tVec , sModelParams.sDriverFunc.vals , diffFromCenter,'linear');
+        %         if isnan(driverFuncVal)
+        %             driverFuncVal = 0;
+        %         end
         
         if i > 1 % not first iter
             previousVspt = sAllInfoVecCurrentTime.sVolumes.Vspt;
@@ -65,6 +72,8 @@ while lastIter < 10
         lastIter = i;
     end
 end
+
+%save('tenMinRunNoDriverEndRes.mat','sAllInfoVec');
 %% analyse:
 %CardioPlots(sAllInfoVec,lastIter,'samples');
 CardioPlots(sAllInfoVec,lastIter,'sec');

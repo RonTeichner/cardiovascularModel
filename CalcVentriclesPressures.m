@@ -79,8 +79,9 @@ switch useMatlabSolver
         Prvf = double(subs(PrvfSym, VsptSym, Vspt)); % [kPa]
         Pspt = double(subs(PsptSym, VsptSym, Vspt)); % [kPa]
     case false
+        VsptRes = 10e-6;
         VsptValsLimits = 0.5e-3*[-1,1] + previousVspt; % [l]
-        VsptVals = VsptValsLimits(1) : 0.01e-6 : VsptValsLimits(2);
+        VsptVals = VsptValsLimits(1) : VsptRes : VsptValsLimits(2);
         
         VlvfVals = Vlv + VsptVals; % [l]
         VrvfVals = Vrv - VsptVals; % [l]
@@ -99,7 +100,7 @@ switch useMatlabSolver
         
         debugVsptSolDiff = sModelParams.Pa_to_mmHg * 1e3*debugVsptSolDiff; % [mmHg]
         if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax            
-            [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PlvfVals(solutionIdx),PsptVals(solutionIdx));
+            [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PrvfVals(solutionIdx),PsptVals(solutionIdx));
         else
             [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(true,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams);
         end
