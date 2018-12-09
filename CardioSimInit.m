@@ -79,4 +79,19 @@ switch method
             disp('initial state not pass volumes check');
             pause(1);
         end
+    case 'endTenMin' % with no inertia
+        sLoadedState = load('endTenMin.mat');
+        sStateVecInit.sVolumes.Vrv = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vrv;
+        sStateVecInit.sVolumes.Vlv = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vlv;
+        sStateVecInit.sVolumes.Vpa = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vpa;
+        sStateVecInit.sVolumes.Vpu = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vpu;
+        sStateVecInit.sVolumes.Vao = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vao;
+        sStateVecInit.sVolumes.Vvc = sLoadedState.sAllInfoVecCurrentTime.sVolumes.Vvc;
+        sStateVecInit.sValves.aortic = sLoadedState.sAllInfoVecCurrentTime.sValves.aortic;
+        sStateVecInit.sValves.pulmunary = sLoadedState.sAllInfoVecCurrentTime.sValves.pulmunary;
+        sStateVecInit.sValves.mitral = sLoadedState.sAllInfoVecCurrentTime.sValves.mitral;
+        sStateVecInit.sValves.tricuspid = sLoadedState.sAllInfoVecCurrentTime.sValves.tricuspid;
+        sStateVecInit.sFlows.Qav = sLoadedState.sAllInfoVecCurrentTime.sFlows.Qav;
+        sStateVecInit.sFlows.Qpv = sLoadedState.sAllInfoVecCurrentTime.sFlows.Qpv;
+        
 end

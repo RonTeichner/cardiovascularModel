@@ -50,8 +50,10 @@ subplot(2,3,5); plot(tVec,sAllInfoVec.sVolumes.Vrvf(startIdx:stopIdx)./1e-3); xl
 subplot(2,3,6); plot(tVec,sAllInfoVec.sVolumes.Vspt(startIdx:stopIdx)./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt'); grid on;
 
 figure; 
-subplot(2,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;
-subplot(2,1,2); plot(tVec,[0;diff(sAllInfoVec.sVolumes.Vspt(startIdx:stopIdx))]./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt solution diff'); grid on;
+subplot(3,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;
+percentageVsptErr(startIdx:stopIdx) = transpose(sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)) ./ sAllInfoVec.sPressures.Pspt(startIdx:stopIdx) * 100;
+subplot(3,1,2); plot(tVec,percentageVsptErr(startIdx:stopIdx)); xlabel('sec'); ylabel('[%]'); title('Vspt solution err [%]'); grid on;
+subplot(3,1,3); plot(tVec,[0;diff(sAllInfoVec.sVolumes.Vspt(startIdx:stopIdx))]./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt solution diff'); grid on;
 
 figure; 
 subplot(2,3,4); plot(tVec,sAllInfoVec.sFlows.Qsys(startIdx:stopIdx)); xlabel('sec'); ylabel('l/s'); title('Qsys'); grid on;
@@ -123,5 +125,9 @@ subplot(2,2,1); plot(tVec,sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3); tit
 %xlim([10,12])
 subplot(2,2,2); plot(tVec,sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3); title('Vrv'); ylabel('[ml]'); xlabel('sec'); grid on; ylim([min(minV,0) , maxV+10]);
 %xlim([10,12])
+
+figure;
+subplot(1,2,1); scatter(sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Plv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Left Ventricle'); ylim([-5,140]); xlim([0,150]);
+subplot(1,2,2); scatter(sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Prv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Right Ventricle'); ylim([-5,140]); xlim([0,150]);
 end
 

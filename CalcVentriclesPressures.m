@@ -87,7 +87,7 @@ switch useMatlabSolver
             % make best effort:
             display(['VsptSolver best effort starts']);
             %tic;
-            VsptRes = 1e-6; VsptSearchMargins = 10e-3; % [sec]
+            VsptRes = 2e-6; VsptSearchMargins = 3e-3; % [sec]
             sSimParamsTmp = sSimParams;
             sSimParamsTmp.VsptSolutionDiffMax = 100;
             [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(false,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParamsTmp);
