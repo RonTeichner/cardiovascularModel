@@ -46,7 +46,7 @@ sModelParams.Rpul = 19;  % [KPa*s/l]
 
 Lav = 1e-6; Lpv = 1e-6; %1e-6 [KmmHg*s^2/l]
 sModelParams.Lav = Lav * sModelParams.mmHg_to_Pa; % [KPa*s^2/l]
-sModelParams.Lpv = inductanceVal * sModelParams.mmHg_to_Pa; % [KPa*s^2/l]
+sModelParams.Lpv = Lpv * sModelParams.mmHg_to_Pa; % [KPa*s^2/l]
 
 sModelParams.sLvf.P0        = 0.17; % [KPa]
 sModelParams.sLvf.lambda    = 15;   % [1/l]

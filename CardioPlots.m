@@ -111,23 +111,23 @@ legend('Qsys','Qpul','Qav','Qpv','Qmt','Qtc');
 % closeIdx = not(sAllInfoVec.sValves.tricuspid(startIdx:stopIdx)); hold on; plot(tVec(closeIdx),Qtc(closeIdx),'r.');
 
 figure;
-subplot(2,2,3); plot(tVec,sAllInfoVec.sPressures.Plv(startIdx:stopIdx)); title('Plv'); ylabel('[mmHg]'); xlabel('sec'); grid on;
+subplot(2,3,4); plot(tVec,sAllInfoVec.sPressures.Plv(startIdx:stopIdx)); title('Plv'); ylabel('[mmHg]'); xlabel('sec'); grid on;
 hold all; plot(tVec,sAllInfoVec.sPressures.Pao(startIdx:stopIdx)); plot(tVec,sAllInfoVec.sPressures.Ppu(startIdx:stopIdx));
 legend('Plv','Pao','Ppu');
 %xlim([10,12])
-subplot(2,2,4); plot(tVec,sAllInfoVec.sPressures.Prv(startIdx:stopIdx)); title('Prv'); ylabel('[mmHg]'); xlabel('sec'); grid on; 
+subplot(2,3,5); plot(tVec,sAllInfoVec.sPressures.Prv(startIdx:stopIdx)); title('Prv'); ylabel('[mmHg]'); xlabel('sec'); grid on; 
 hold all; plot(tVec,sAllInfoVec.sPressures.Ppa(startIdx:stopIdx)); plot(tVec,sAllInfoVec.sPressures.Pvc(startIdx:stopIdx));
 legend('Prv','Ppa','Pvc');
 %xlim([10,12])
 maxV = max([sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3;sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3]);
 minV = min([sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3;sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3]);
-subplot(2,2,1); plot(tVec,sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3); title('Vlv'); ylabel('[ml]'); xlabel('sec'); grid on; ylim([min(minV,0) , maxV+10]);
+subplot(2,3,1); plot(tVec,sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3); title('Vlv'); ylabel('[ml]'); xlabel('sec'); grid on; ylim([min(minV,0) , maxV+10]);
 %xlim([10,12])
-subplot(2,2,2); plot(tVec,sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3); title('Vrv'); ylabel('[ml]'); xlabel('sec'); grid on; ylim([min(minV,0) , maxV+10]);
+subplot(2,3,2); plot(tVec,sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3); title('Vrv'); ylabel('[ml]'); xlabel('sec'); grid on; ylim([min(minV,0) , maxV+10]);
 %xlim([10,12])
 
-figure;
-subplot(1,2,1); scatter(sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Plv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Left Ventricle'); ylim([-5,140]); xlim([0,150]);
-subplot(1,2,2); scatter(sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Prv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Right Ventricle'); ylim([-5,140]); xlim([0,150]);
+
+subplot(2,3,3); scatter(sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Plv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Left Ventricle'); ylim([-5,140]); xlim([0,150]);
+subplot(2,3,6); scatter(sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3 , sAllInfoVec.sPressures.Prv(startIdx:stopIdx),'.'); xlabel('[ml]'); ylabel('[mmHg]'); grid on; title('Right Ventricle'); ylim([-5,140]); xlim([0,150]);
 end
 

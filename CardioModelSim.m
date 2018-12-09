@@ -1,4 +1,6 @@
-clear all; close all; clc;
+clear all; 
+%close all; 
+clc;
 dbstop if error
 
 sModelParams = CardioModelParams;
@@ -7,7 +9,7 @@ sSimParams.simDuration = 10; % [sec]
 sSimParams.VsptSolutionDiffMax = 1; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver'}
-sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step will not be greater than the whole chamber volume
+sSimParams.enableMaxFlowIsCurrentVol = true; % the maximum flow in a time-step will not be greater than the whole chamber volume
 sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit function has no solution before sSimParams.minSimDuration is reached the sim will restart
 heartOn = true;
 
@@ -34,10 +36,10 @@ while lastIter < nIterForMinSimDuration
             display(['iter: ',int2str(i),' out of ',int2str(nIter)])
         end
         
-        if ~mod(i,1e4)
-            xLimits = [0,1e3];
-            close all; CardioPlots(sAllInfoVec,i-1,'sec',xLimits); pause(0.5);
-        end
+%         if ~mod(i,1e4)
+%             xLimits = [0,1e3];
+%             close all; CardioPlots(sAllInfoVec,i-1,'sec',xLimits); pause(0.5);
+%         end
         
         % driverFunc value:
         currentTime = sAllInfoVec.tVec(i);
@@ -86,5 +88,5 @@ end
 %CardioPlots(sAllInfoVec,lastIter,'samples',xLimits);
 xLimits = [0,1e3];
 %xLimits = [10,12];
-xLimits = [8,9];
+xLimits = [7,9];
 CardioPlots(sAllInfoVec,lastIter,'sec',xLimits);
