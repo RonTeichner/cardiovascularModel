@@ -87,7 +87,7 @@ switch useMatlabSolver
             % make best effort:
             display(['VsptSolver best effort starts']);
             %tic;
-            VsptRes = 2e-6; VsptSearchMargins = 3e-3; % [sec]
+            VsptRes = 1e-6; VsptSearchMargins = 3e-3; % [sec]
             sSimParamsTmp = sSimParams;
             sSimParamsTmp.VsptSolutionDiffMax = 100;
             [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(false,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParamsTmp);
@@ -115,6 +115,7 @@ switch useMatlabSolver
         Vspt = VsptVals(solutionIdx);
         
         debugVsptSolDiff = sModelParams.Pa_to_mmHg * 1e3*debugVsptSolDiff; % [mmHg]
+        %display(['debugVsptSolDiff: ',num2str(debugVsptSolDiff)]);
         if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax
             [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PrvfVals(solutionIdx),PsptVals(solutionIdx));
         else

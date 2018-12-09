@@ -46,7 +46,7 @@ end
 V = [sStateVec.sVolumes.Vpa; sStateVec.sVolumes.Vpu; sStateVec.sVolumes.Vlv; sStateVec.sVolumes.Vao; sStateVec.sVolumes.Vvc; sStateVec.sVolumes.Vrv]; % [l]
 Q = [sFlows.Qpv; sFlows.Qpul; sFlows.Qmt; sFlows.Qav; sFlows.Qsys; sFlows.Qtc]; % [l/s]
 
-V = V + sSimParams.ts * (sModelParams.A * Q);
+V = V + sSimParams.ts * (sModelParams.A * Q); %[l]
 
 %% Update state vec:
 sUpdatedStateVec.sVolumes.Vpa = V(1); % [l]

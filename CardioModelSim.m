@@ -3,13 +3,20 @@ clear all;
 clc;
 dbstop if error
 
-sModelParams = CardioModelParams;
+article = 'Simulation of cardiovascular system diseases by including';
+%article = 'Unique parameter identification for cardiac diagnosis in critical care using minimal data sets';
+
+if strcmp(article,'Unique parameter identification for cardiac diagnosis in critical care using minimal data sets')
+    disp('model has more incductance than implemented now');
+end
+
+sModelParams = CardioModelParams(article);
 sSimParams.ts = 0.5e-3; % [sec] 
-sSimParams.simDuration = 10; % [sec]
+sSimParams.simDuration = 20; % [sec]
 sSimParams.VsptSolutionDiffMax = 1; % [mmHg]
 sSimParams.seed = round(rand*1e6);
-sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver'}
-sSimParams.enableMaxFlowIsCurrentVol = true; % the maximum flow in a time-step will not be greater than the whole chamber volume
+sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver','endTenMin'}
+sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step will not be greater than the whole chamber volume
 sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit function has no solution before sSimParams.minSimDuration is reached the sim will restart
 heartOn = true;
 
@@ -89,4 +96,4 @@ end
 xLimits = [0,1e3];
 %xLimits = [10,12];
 xLimits = [7,9];
-CardioPlots(sAllInfoVec,lastIter,'sec',xLimits);
+CardioPlots(sAllInfoVec,lastIter,'sec',xLimits,sSimParams);

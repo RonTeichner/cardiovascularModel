@@ -1,4 +1,4 @@
-function CardioPlots(sAllInfoVec,lastIter,xlabelMethod,xLimits)
+function CardioPlots(sAllInfoVec,lastIter,xlabelMethod,xLimits,sSimParams)
 
 switch xlabelMethod
     case 'sec'
@@ -80,21 +80,21 @@ plot(tVec,Qtc); xlabel('sec'); ylabel('l/s'); title('Qtc'); grid on;
 closeIdx = not(sAllInfoVec.sValves.tricuspid(startIdx:stopIdx)); hold on; plot(tVec(closeIdx),Qtc(closeIdx),'r.');
 
 figure; hold all; 
-plot(tVec,cumsum(sAllInfoVec.sFlows.Qsys(startIdx:stopIdx))); xlabel('sec'); ylabel('l');  grid on;
-plot(tVec,cumsum(sAllInfoVec.sFlows.Qpul(startIdx:stopIdx))); xlabel('sec'); ylabel('l'); grid on;
+plot(tVec,sSimParams.ts*cumsum(sAllInfoVec.sFlows.Qsys(startIdx:stopIdx))./1e-3); xlabel('sec'); ylabel('ml');  grid on;
+plot(tVec,sSimParams.ts*cumsum(sAllInfoVec.sFlows.Qpul(startIdx:stopIdx))./1e-3); xlabel('sec'); ylabel('ml'); grid on;
 
 
 Qav = sAllInfoVec.sFlows.Qav(startIdx:stopIdx); 
-plot(tVec,cumsum(Qav)); xlabel('sec'); ylabel('l'); grid on; 
+plot(tVec,sSimParams.ts*cumsum(Qav)./1e-3); xlabel('sec'); ylabel('ml'); grid on; 
 
 Qpv = sAllInfoVec.sFlows.Qpv(startIdx:stopIdx); 
-plot(tVec,cumsum(Qpv)); xlabel('sec'); ylabel('l'); grid on; 
+plot(tVec,sSimParams.ts*cumsum(Qpv)./1e-3); xlabel('sec'); ylabel('ml'); grid on; 
 
 Qmt = sAllInfoVec.sFlows.Qmt(startIdx:stopIdx); 
-plot(tVec,cumsum(Qmt)); xlabel('sec'); ylabel('l'); grid on; 
+plot(tVec,sSimParams.ts*cumsum(Qmt)./1e-3); xlabel('sec'); ylabel('ml'); grid on; 
  
 Qtc = sAllInfoVec.sFlows.Qtc(startIdx:stopIdx); 
-plot(tVec,cumsum(Qtc)); xlabel('sec'); ylabel('l'); grid on; 
+plot(tVec,sSimParams.ts*cumsum(Qtc)./1e-3); xlabel('sec'); ylabel('ml'); grid on; 
 
 title('Flow cumsum');
 legend('Qsys','Qpul','Qav','Qpv','Qmt','Qtc');
