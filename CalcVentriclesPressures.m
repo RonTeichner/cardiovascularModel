@@ -31,7 +31,8 @@ Pperi = sModelParams.Pa_to_mmHg*1e3*cardioUtilityFunctions(funcSym,sInputs,sFunc
 % 'f' function has units of [kPa]
 
 useMatlabSolver = isempty(previousVspt);
-[Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams);
+VsptRes = 10e-6; VsptSearchMargins = 1e-3; % [sec]
+[Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams);
 
 
 %% continue with calculations:
@@ -53,34 +54,49 @@ Prv = Prvf + Pperi; % [mmHg]
 
 end
 
-function [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams)
+function [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams)
 switch useMatlabSolver
     case true
-        debugVsptSolDiff = NaN;
-        syms VsptSym
-        
-        VlvfSym = Vlv + VsptSym; % [l]
-        VrvfSym = Vrv - VsptSym; % [l]
-        
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VsptSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
-        PsptSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-        
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VlvfSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
-        PlvfSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-        
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VrvfSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
-        PrvfSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
-        
-        Vspt = double(vpasolve(PsptSym + PrvfSym - PlvfSym , VsptSym)); % [l]
-        
-        Vlvf = double(subs(VlvfSym, VsptSym, Vspt)); % [l]
-        Vrvf = double(subs(VrvfSym, VsptSym, Vspt)); % [l]
-        Plvf = double(subs(PlvfSym, VsptSym, Vspt)); % [kPa]
-        Prvf = double(subs(PrvfSym, VsptSym, Vspt)); % [kPa]
-        Pspt = double(subs(PsptSym, VsptSym, Vspt)); % [kPa]
+        % matlab solver is very slow -> use it only at beginning:
+        if isempty(previousVspt)
+            syms VsptSym
+            
+            VlvfSym = Vlv + VsptSym; % [l]
+            VrvfSym = Vrv - VsptSym; % [l]
+            
+            funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VsptSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
+            PsptSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+            
+            funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VlvfSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
+            PlvfSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+            
+            funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VrvfSym,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
+            PrvfSym = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
+            
+            Vspt = double(vpasolve(PsptSym + PrvfSym - PlvfSym , VsptSym)); % [l]
+            
+            Vlvf = double(subs(VlvfSym, VsptSym, Vspt)); % [l]
+            Vrvf = double(subs(VrvfSym, VsptSym, Vspt)); % [l]
+            Plvf = double(subs(PlvfSym, VsptSym, Vspt)); % [kPa]
+            Prvf = double(subs(PrvfSym, VsptSym, Vspt)); % [kPa]
+            Pspt = double(subs(PsptSym, VsptSym, Vspt)); % [kPa]
+            
+            debugVsptSolDiff = abs(Pspt - (Plvf - Prvf));
+        else
+            
+            % make best effort:
+            display(['VsptSolver best effort starts']);
+            %tic;
+            VsptRes = 1e-6; VsptSearchMargins = 10e-3; % [sec]
+            sSimParamsTmp = sSimParams;
+            sSimParamsTmp.VsptSolutionDiffMax = 100;
+            [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(false,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParamsTmp);
+            %tVsptSolver = toc;
+            %display(['VsptSolver best effort ends after ',num2str(tVsptSolver),' sec']);
+            
+        end
     case false
-        VsptRes = 10e-6;
-        VsptValsLimits = 0.5e-3*[-1,1] + previousVspt; % [l]
+        VsptValsLimits = VsptSearchMargins*[-1,1] + previousVspt; % [l]
         VsptVals = VsptValsLimits(1) : VsptRes : VsptValsLimits(2);
         
         VlvfVals = Vlv + VsptVals; % [l]
@@ -99,10 +115,10 @@ switch useMatlabSolver
         Vspt = VsptVals(solutionIdx);
         
         debugVsptSolDiff = sModelParams.Pa_to_mmHg * 1e3*debugVsptSolDiff; % [mmHg]
-        if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax            
+        if debugVsptSolDiff < sSimParams.VsptSolutionDiffMax
             [Vlvf,Vrvf,Plvf,Prvf,Pspt] = deal(VlvfVals(solutionIdx),VrvfVals(solutionIdx),PlvfVals(solutionIdx),PrvfVals(solutionIdx),PsptVals(solutionIdx));
         else
-            [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(true,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,sModelParams,sSimParams);
+            [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(true,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams);
         end
 end
 

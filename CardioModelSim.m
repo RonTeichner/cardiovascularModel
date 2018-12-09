@@ -2,12 +2,13 @@ clear all; close all; clc;
 dbstop if error
 
 sModelParams = CardioModelParams;
-sSimParams.ts = 0.5e-3; % [sec]
-sSimParams.simDuration = 30; % [sec]
-sSimParams.VsptSolutionDiffMax = 2; % [mmHg]
+sSimParams.ts = 0.5e-3; % [sec] 
+sSimParams.simDuration = 60; % [sec]
+sSimParams.VsptSolutionDiffMax = 0.5; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'random'; % {'random','endDiastolic','endTenMinNoDriver'}
 sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step will not be greater than the whole chamber volume
+sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit function has no solution before sSimParams.minSimDuration is reached the sim will restart
 heartOn = true;
 
 rng(sSimParams.seed);
@@ -23,14 +24,21 @@ heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
 %% runSim:
 lastIter = 1;
-while lastIter < 10
+nIterForMinSimDuration = round(sSimParams.minSimDuration / sSimParams.ts);
+while lastIter < nIterForMinSimDuration
     display('sim starts')
     sStateVecInit = CardioSimInit(sSimParams.initMethod,sModelParams,sSimParams);
     sStateVec = sStateVecInit;
     for i = 1:nIter
-        if ~mod(i,100)
+        if ~mod(i,1e2)
             display(['iter: ',int2str(i),' out of ',int2str(nIter)])
         end
+        
+        if ~mod(i,1e4)
+            xLimits = [0,1e3];
+            close all; CardioPlots(sAllInfoVec,i-1,'sec',xLimits); pause(0.5);
+        end
+        
         % driverFunc value:
         currentTime = sAllInfoVec.tVec(i);
         [~,closestCenterIdx] = min(abs(driverFuncCenters - currentTime));
@@ -75,5 +83,7 @@ end
 
 %save('tenMinRunNoDriverEndRes.mat','sAllInfoVec');
 %% analyse:
-%CardioPlots(sAllInfoVec,lastIter,'samples');
-CardioPlots(sAllInfoVec,lastIter,'sec');
+%CardioPlots(sAllInfoVec,lastIter,'samples',xLimits);
+%xLimits = [0,1e3];
+xLimits = [10,12];
+CardioPlots(sAllInfoVec,lastIter,'sec',xLimits);
