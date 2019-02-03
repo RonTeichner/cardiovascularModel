@@ -12,7 +12,7 @@ end
 
 sModelParams = CardioModelParams(article);
 sSimParams.ts = 1e-3; % [sec] It's not a good Idea to have ts more than 1ms because the driver function has a narrow peak 
-sSimParams.simDuration = 60*60; % [sec]
+sSimParams.simDuration = 20; % [sec]
 sSimParams.VsptSolutionDiffMax = 5; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver','endTenMin'}
@@ -21,6 +21,11 @@ sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit fu
 heartOn = true;
 
 %% paramsUpdate:
+sSimParams.sParamsSwift.enableAllParamsSwift = true;
+sSimParams.sParamsSwift.paramMaxAbsChange = 0.1; % [out of 1, like 10%]
+sSimParams.sParamsSwift.noiseStd = 0.0005; % [from initial val]
+%sSimParams.sParamsSwift.iirAlfa = 1e-3; % param = (1-alfa)*previous + alfa*noise
+
 sSimParams.enableHemorrhage = false;
 hemorrhageDuration = 10; % [sec]
 totalBloodVolAfterHemorrhage = 0.75 * sModelParams.totalBloodVolume; % [v]
@@ -64,6 +69,7 @@ heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 
 
 %% runSim:
+sModelParamsInit = sModelParams;
 lastIter = 1;
 nIterForMinSimDuration = round(sSimParams.minSimDuration / sSimParams.ts);
 while lastIter < nIterForMinSimDuration
@@ -108,6 +114,10 @@ while lastIter < nIterForMinSimDuration
         end
         
         %% params update:
+        if sSimParams.sParamsSwift.enableAllParamsSwift
+            sModelParams = ModelParamsSwift(sModelParamsInit,sModelParams,sSimParams);
+        end
+        
         if sSimParams.enableHemorrhage
             % update blood volume within the first 10 sec:
             if currentTime < hemorrhageDuration
@@ -153,10 +163,10 @@ while lastIter < nIterForMinSimDuration
     end
 end
 
-save('hourRun.mat','sAllInfoVec');
+%save('hourRun.mat','sAllInfoVec');
 %% analyse:
 %CardioPlots(sAllInfoVec,lastIter,'samples',xLimits);
-xLimits = [0,1e3];
+xLimits = [0,4e3];
 %xLimits = [10,12];
 %xLimits = [7,9];
 plotLastOnly = true;

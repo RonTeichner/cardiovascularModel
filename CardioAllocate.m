@@ -34,3 +34,32 @@ sAllInfoVec.sFlows.Qav = zeros(nIter,1);
 sAllInfoVec.sFlows.Qpv = zeros(nIter,1);
 sAllInfoVec.sFlows.Qmt = zeros(nIter,1);
 sAllInfoVec.sFlows.Qtc = zeros(nIter,1);
+
+ff = {'Ppl','Rsys','Rmt','Rav','Rtc','Rpv','Rpul','Lav','Lpv'};
+for ffIdx = 1:numel(ff)
+    sAllInfoVec.sModelParams.(ff{ffIdx}) = zeros(nIter,1);    
+end
+
+ff = {'P0','lambda','V0','Vd','Ees'};
+fPre = {'sLvf','sRvf','sSPT'};
+for fPreIdx =1:numel(fPre)
+    for ffIdx = 1:numel(ff)
+        sAllInfoVec.sModelParams.(fPre{fPreIdx}).(ff{ffIdx}) = zeros(nIter,1);
+    end
+end
+
+ff = {'P0','lambda','V0'};
+fPre = {'sPcd'};
+for fPreIdx =1:numel(fPre)
+    for ffIdx = 1:numel(ff)
+        sAllInfoVec.sModelParams.(fPre{fPreIdx}).(ff{ffIdx}) = zeros(nIter,1);
+    end
+end
+
+ff = {'Vd','Ees'};
+fPre = {'sVc','sPa','sPu','sAo'};
+for fPreIdx =1:numel(fPre)
+    for ffIdx = 1:numel(ff)
+        sAllInfoVec.sModelParams.(fPre{fPreIdx}).(ff{ffIdx}) = zeros(nIter,1);
+    end
+end

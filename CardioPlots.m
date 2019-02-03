@@ -113,6 +113,9 @@ if ~plotLastOnly
 end
 
 figure;
+plot(tVec,sAllInfoVec.sModelParams.Ppl(startIdx:stopIdx)); title('Ppl'); ylabel('[mmHg]'); xlabel('sec'); grid on;
+
+figure;
 subplot(2,3,4); plot(tVec,sAllInfoVec.sPressures.Plv(startIdx:stopIdx)); title('Plv'); ylabel('[mmHg]'); xlabel('sec'); grid on;
 hold all; plot(tVec,sAllInfoVec.sPressures.Pao(startIdx:stopIdx)); plot(tVec,sAllInfoVec.sPressures.Ppu(startIdx:stopIdx));
 legend('Plv','Pao','Ppu');

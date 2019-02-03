@@ -79,4 +79,6 @@ sAllInfoVec.sValves = sValves;
 
 sAllInfoVec.sFlows = sFlows;  % [l/s]
 
+sAllInfoVec.sModelParams = sModelParams;
+
 end
