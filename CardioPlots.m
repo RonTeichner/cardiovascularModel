@@ -52,13 +52,13 @@ if ~plotLastOnly
     
     figure;
     subplot(3,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;
-    percentageVsptErr(startIdx:stopIdx) = transpose(sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)) ./ sAllInfoVec.sPressures.Pspt(startIdx:stopIdx) * 100;
+    percentageVsptErr(startIdx:stopIdx) = (sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)) ./ sAllInfoVec.sPressures.Pspt(startIdx:stopIdx) * 100;
     subplot(3,1,2); plot(tVec,percentageVsptErr(startIdx:stopIdx)); xlabel('sec'); ylabel('[%]'); title('Vspt solution err [%]'); grid on;
     subplot(3,1,3); plot(tVec,[0;diff(sAllInfoVec.sVolumes.Vspt(startIdx:stopIdx))]./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt solution diff'); grid on;
     
     figure;
     subplot(2,3,4); plot(tVec,sAllInfoVec.sFlows.Qsys(startIdx:stopIdx)); xlabel('sec'); ylabel('l/s'); title('Qsys'); grid on;
-    subplot(2,3,3); plot(tVec,sAllInfoVec.sFlows.Qpul(startIdx:stopIdx)); xlabel('sec'); ylabel('l/s'); title('Qpul'); grid on;
+      subplot(2,3,3); plot(tVec,sAllInfoVec.sFlows.Qpul(startIdx:stopIdx)); xlabel('sec'); ylabel('l/s'); title('Qpul'); grid on;
     
     subplot(2,3,5);
     Qav = sAllInfoVec.sFlows.Qav(startIdx:stopIdx);

@@ -31,7 +31,7 @@ Pperi = sModelParams.Pa_to_mmHg*1e3*cardioUtilityFunctions(funcSym,sInputs,sFunc
 % 'f' function has units of [kPa]
 
 useMatlabSolver = isempty(previousVspt);
-VsptRes = 10e-6; VsptSearchMargins = 1e-3; % [sec]
+VsptRes = 10e-6; VsptSearchMargins = 0.5e-3; % [l]
 [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams);
 
 
@@ -102,13 +102,20 @@ switch useMatlabSolver
         VlvfVals = Vlv + VsptVals; % [l]
         VrvfVals = Vrv - VsptVals; % [l]
         
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VsptVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
+        funcSym = 'g';
+        %sInputs.V = VsptVals; sInputs.e = driverFuncVal; sFuncParams.P0 = sModelParams.sSPT.P0; sFuncParams.lambda = sModelParams.sSPT.lambda; sFuncParams.V0 = sModelParams.sSPT.V0; sFuncParams.Ees = sModelParams.sSPT.Ees; sFuncParams.Vd = sModelParams.sSPT.Vd;
+        [sInputs.V, sInputs.e] = deal(VsptVals,driverFuncVal); 
+        [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sSPT.P0,sModelParams.sSPT.lambda,sModelParams.sSPT.V0, sModelParams.sSPT.Ees, sModelParams.sSPT.Vd);
         PsptVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
         
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VlvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
+        funcSym = 'g'; 
+        [sInputs.V, sInputs.e] = deal(VlvfVals,driverFuncVal); 
+        [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sLvf.P0,sModelParams.sLvf.lambda,sModelParams.sLvf.V0, sModelParams.sLvf.Ees, sModelParams.sLvf.Vd);
         PlvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
         
-        funcSym = 'g'; [sInputs.V, sInputs.e] = deal(VrvfVals,driverFuncVal); [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
+        funcSym = 'g'; 
+        [sInputs.V, sInputs.e] = deal(VrvfVals,driverFuncVal); 
+        [sFuncParams.P0, sFuncParams.lambda, sFuncParams.V0, sFuncParams.Ees, sFuncParams.Vd] = deal(sModelParams.sRvf.P0,sModelParams.sRvf.lambda,sModelParams.sRvf.V0, sModelParams.sRvf.Ees, sModelParams.sRvf.Vd);
         PrvfVals = cardioUtilityFunctions(funcSym,sInputs,sFuncParams); % [kPa]
         
         [debugVsptSolDiff,solutionIdx] = min(abs(PsptVals - (PlvfVals-PrvfVals)));

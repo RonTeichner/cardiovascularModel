@@ -9,6 +9,7 @@ sAllInfoVec.sVolumes.Vrv = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vspt = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vlvf = zeros(nIter,1);
 sAllInfoVec.sVolumes.Vrvf = zeros(nIter,1);
+sAllInfoVec.sVolumes.debugVsptSolDiff = zeros(nIter,1);
 sAllInfoVec.sVolumes.totalBloodVol = zeros(nIter,1);
 
 sAllInfoVec.sPressures.Plv = zeros(nIter,1);

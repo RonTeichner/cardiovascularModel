@@ -1,8 +1,8 @@
 function sModelParams = CardioModelParams(article)
 
 sModelParams.mmHg_to_Pa = 133.322387415; % 1[mmHg] = 133.322387415[Pa]
-        sModelParams.Pa_to_mmHg = 1/sModelParams.mmHg_to_Pa;
-        sModelParams.mmHg_to_kPa = sModelParams.mmHg_to_Pa/1e3;
+sModelParams.Pa_to_mmHg = 1/sModelParams.mmHg_to_Pa;
+sModelParams.mmHg_to_kPa = sModelParams.mmHg_to_Pa/1e3;
 
 switch article
     case 'Simulation of cardiovascular system diseases by including'     

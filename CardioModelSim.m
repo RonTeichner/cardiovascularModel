@@ -11,9 +11,9 @@ if strcmp(article,'Unique parameter identification for cardiac diagnosis in crit
 end
 
 sModelParams = CardioModelParams(article);
-sSimParams.ts = 0.5e-3; % [sec] 
-sSimParams.simDuration = 40; % [sec]
-sSimParams.VsptSolutionDiffMax = 1; % [mmHg]
+sSimParams.ts = 1e-3; % [sec] It's not a good Idea to have ts more than 1ms because the driver function has a narrow peak 
+sSimParams.simDuration = 60*60; % [sec]
+sSimParams.VsptSolutionDiffMax = 5; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver','endTenMin'}
 sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step will not be greater than the whole chamber volume
@@ -60,7 +60,7 @@ sAllInfoVec.driverFuncVal = zeros(nIter,1);
 %% driverFunc centers:
 heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 % constant heart beat:
-driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
+%driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
 
 
 %% runSim:
@@ -68,10 +68,12 @@ lastIter = 1;
 nIterForMinSimDuration = round(sSimParams.minSimDuration / sSimParams.ts);
 while lastIter < nIterForMinSimDuration
     display('sim starts')
-    sStateVecInit = CardioSimInit(sSimParams.initMethod,sModelParams,sSimParams);
+    [sStateVecInit,driverFuncFirstCenter] = CardioSimInit(sSimParams.initMethod,sModelParams,sSimParams);
+    driverFuncCenters = [driverFuncFirstCenter : heartBeatsTs : sSimParams.simDuration]; % [sec]
     sStateVec = sStateVecInit;
+    tic
     for i = 1:nIter
-        if ~mod(i,1e2)
+        if ~mod(i,1e3)
             display(['iter: ',int2str(i),' out of ',int2str(nIter)])
         end
         
@@ -138,9 +140,11 @@ while lastIter < nIterForMinSimDuration
         if cardioErr
             break
         end
-        sAllInfoVec = CardioUpdateInfoVec(sAllInfoVecCurrentTime,sAllInfoVec,i);
+        %sAllInfoVec = CardioUpdateInfoVec(sAllInfoVecCurrentTime,sAllInfoVec,i);
+        CardioUpdateInfoVecScript
         sAllInfoVec.driverFuncVal(i) = driverFuncVal;
     end
+    toc
     
     if cardioErr
         lastIter = i-1;
@@ -149,7 +153,7 @@ while lastIter < nIterForMinSimDuration
     end
 end
 
-%save('tenMinRunNoDriverEndRes.mat','sAllInfoVec');
+save('hourRun.mat','sAllInfoVec');
 %% analyse:
 %CardioPlots(sAllInfoVec,lastIter,'samples',xLimits);
 xLimits = [0,1e3];

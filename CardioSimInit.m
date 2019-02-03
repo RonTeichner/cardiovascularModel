@@ -1,4 +1,6 @@
-function sStateVecInit = CardioSimInit(method,sModelParams,sSimParams)
+function [sStateVecInit,driverFuncFirstCenter] = CardioSimInit(method,sModelParams,sSimParams)
+
+driverFuncFirstCenter = rand*0.5;
 
 switch method
     case 'random'
