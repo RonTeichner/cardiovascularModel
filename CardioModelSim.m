@@ -20,6 +20,36 @@ sSimParams.enableMaxFlowIsCurrentVol = false; % the maximum flow in a time-step 
 sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit function has no solution before sSimParams.minSimDuration is reached the sim will restart
 heartOn = true;
 
+%% paramsUpdate:
+sSimParams.enableHemorrhage = false;
+hemorrhageDuration = 10; % [sec]
+totalBloodVolAfterHemorrhage = 0.75 * sModelParams.totalBloodVolume; % [v]
+totalInitialBloodVol = sModelParams.totalBloodVolume; % [v]
+deltaBloodVol = totalInitialBloodVol - totalBloodVolAfterHemorrhage; % [v]
+deltaBloodVolPerTs = deltaBloodVol/(hemorrhageDuration/sSimParams.ts); % [v]
+
+sSimParams.enableThoracicCavityPressureChange = false;
+ThoracicCavityPressureChangeDuration = 10; % [sec]
+initialPpl = sModelParams.Ppl; % [mmHg]
+endPpl = +3; % [mmHg]
+deltaPpl = endPpl - initialPpl; % [mmHg]
+deltaPplPerTs = deltaPpl/(hemorrhageDuration/sSimParams.ts); % [mmHg]
+
+sSimParams.enableRsysUpdate = false;
+rSysUpdateDuration = 10; % [sec]
+initialRsys = sModelParams.Rsys; % [KPa*s/l]
+endRsys = 80; % [KPa*s/l]
+deltaRsys = endRsys - initialRsys; % [KPa*s/l]
+deltaRsysPerTs = deltaRsys/(hemorrhageDuration/sSimParams.ts); % [KPa*s/l]
+
+sSimParams.enableHeartElastyUpdate = false;
+lvfEsUpdateDuration = 10; % [sec]
+initialLvfEs = sModelParams.sLvf.Ees; % [kPa/l]
+endLvfEs = 300; % [kPa/l]
+deltaLvfEs = endLvfEs - initialLvfEs; % [kPa/l]
+deltaLvfEsPerTs = deltaLvfEs/(hemorrhageDuration/sSimParams.ts); % [kPa/l]
+
+
 rng(sSimParams.seed);
 %rng(832713);
 %% allocate:
@@ -32,34 +62,6 @@ heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 % constant heart beat:
 driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
 
-%% paramsUpdate:
-enableHemorrhage = false;
-hemorrhageDuration = 10; % [sec]
-totalBloodVolAfterHemorrhage = 0.75 * sModelParams.totalBloodVolume; % [v]
-totalInitialBloodVol = sModelParams.totalBloodVolume; % [v]
-deltaBloodVol = totalInitialBloodVol - totalBloodVolAfterHemorrhage; % [v]
-deltaBloodVolPerTs = deltaBloodVol/(hemorrhageDuration/sSimParams.ts); % [v]
-
-enableThoracicCavityPressureChange = false;
-ThoracicCavityPressureChangeDuration = 10; % [sec]
-initialPpl = sModelParams.Ppl; % [mmHg]
-endPpl = +3; % [mmHg]
-deltaPpl = endPpl - initialPpl; % [mmHg]
-deltaPplPerTs = deltaPpl/(hemorrhageDuration/sSimParams.ts); % [mmHg]
-
-enableRsysUpdate = false;
-rSysUpdateDuration = 10; % [sec]
-initialRsys = sModelParams.Rsys; % [KPa*s/l]
-endRsys = 80; % [KPa*s/l]
-deltaRsys = endRsys - initialRsys; % [KPa*s/l]
-deltaRsysPerTs = deltaRsys/(hemorrhageDuration/sSimParams.ts); % [KPa*s/l]
-
-enableHeartElastyUpdate = false;
-lvfEsUpdateDuration = 10; % [sec]
-initialLvfEs = sModelParams.sLvf.Ees; % [kPa/l]
-endLvfEs = 300; % [kPa/l]
-deltaLvfEs = endLvfEs - initialLvfEs; % [kPa/l]
-deltaLvfEsPerTs = deltaLvfEs/(hemorrhageDuration/sSimParams.ts); % [kPa/l]
 
 %% runSim:
 lastIter = 1;
@@ -104,7 +106,7 @@ while lastIter < nIterForMinSimDuration
         end
         
         %% params update:
-        if enableHemorrhage
+        if sSimParams.enableHemorrhage
             % update blood volume within the first 10 sec:
             if currentTime < hemorrhageDuration
                 %sModelParams.totalBloodVolume = totalInitialBloodVol - (currentTime/hemorrhageDuration)*deltaBloodVol;  % [v]
@@ -112,19 +114,19 @@ while lastIter < nIterForMinSimDuration
             end
         end
         
-        if enableThoracicCavityPressureChange
+        if sSimParams.enableThoracicCavityPressureChange
             if currentTime < ThoracicCavityPressureChangeDuration
                 sModelParams.Ppl = sModelParams.Ppl + deltaPplPerTs; % [mmHg]
             end            
         end
         
-        if enableRsysUpdate
+        if sSimParams.enableRsysUpdate
             if currentTime < rSysUpdateDuration
                 sModelParams.Rsys = sModelParams.Rsys + deltaRsysPerTs; % [KPa*s/l]
             end            
         end
         
-        if enableHeartElastyUpdate
+        if sSimParams.enableHeartElastyUpdate
             if currentTime < lvfEsUpdateDuration
                 sModelParams.sLvf.Ees = sModelParams.sLvf.Ees + deltaLvfEsPerTs; % [kPa/l]
             end
