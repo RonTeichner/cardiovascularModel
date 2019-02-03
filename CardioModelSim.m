@@ -1,5 +1,5 @@
 clear all; 
-%close all; 
+close all; 
 clc;
 dbstop if error
 
@@ -12,7 +12,7 @@ end
 
 sModelParams = CardioModelParams(article);
 sSimParams.ts = 0.5e-3; % [sec] 
-sSimParams.simDuration = 20; % [sec]
+sSimParams.simDuration = 40; % [sec]
 sSimParams.VsptSolutionDiffMax = 1; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver','endTenMin'}
@@ -31,6 +31,36 @@ sAllInfoVec.driverFuncVal = zeros(nIter,1);
 heartBeatsTs = 60 / sModelParams.heartRate; % [sec]
 % constant heart beat:
 driverFuncCenters = [rand*0.5 : heartBeatsTs : sSimParams.simDuration]; % [sec]
+
+%% paramsUpdate:
+enableHemorrhage = false;
+hemorrhageDuration = 10; % [sec]
+totalBloodVolAfterHemorrhage = 0.75 * sModelParams.totalBloodVolume; % [v]
+totalInitialBloodVol = sModelParams.totalBloodVolume; % [v]
+deltaBloodVol = totalInitialBloodVol - totalBloodVolAfterHemorrhage; % [v]
+deltaBloodVolPerTs = deltaBloodVol/(hemorrhageDuration/sSimParams.ts); % [v]
+
+enableThoracicCavityPressureChange = false;
+ThoracicCavityPressureChangeDuration = 10; % [sec]
+initialPpl = sModelParams.Ppl; % [mmHg]
+endPpl = +3; % [mmHg]
+deltaPpl = endPpl - initialPpl; % [mmHg]
+deltaPplPerTs = deltaPpl/(hemorrhageDuration/sSimParams.ts); % [mmHg]
+
+enableRsysUpdate = false;
+rSysUpdateDuration = 10; % [sec]
+initialRsys = sModelParams.Rsys; % [KPa*s/l]
+endRsys = 80; % [KPa*s/l]
+deltaRsys = endRsys - initialRsys; % [KPa*s/l]
+deltaRsysPerTs = deltaRsys/(hemorrhageDuration/sSimParams.ts); % [KPa*s/l]
+
+enableHeartElastyUpdate = false;
+lvfEsUpdateDuration = 10; % [sec]
+initialLvfEs = sModelParams.sLvf.Ees; % [kPa/l]
+endLvfEs = 300; % [kPa/l]
+deltaLvfEs = endLvfEs - initialLvfEs; % [kPa/l]
+deltaLvfEsPerTs = deltaLvfEs/(hemorrhageDuration/sSimParams.ts); % [kPa/l]
+
 %% runSim:
 lastIter = 1;
 nIterForMinSimDuration = round(sSimParams.minSimDuration / sSimParams.ts);
@@ -48,7 +78,7 @@ while lastIter < nIterForMinSimDuration
 %             close all; CardioPlots(sAllInfoVec,i-1,'sec',xLimits); pause(0.5);
 %         end
         
-        % driverFunc value:
+        %% driverFunc value:
         currentTime = sAllInfoVec.tVec(i);
         [~,closestCenterIdx] = min(abs(driverFuncCenters - currentTime));
         closestCenterTime = driverFuncCenters(closestCenterIdx);
@@ -73,7 +103,34 @@ while lastIter < nIterForMinSimDuration
             previousVspt = [];
         end
         
-        % cardiomodel time-step:
+        %% params update:
+        if enableHemorrhage
+            % update blood volume within the first 10 sec:
+            if currentTime < hemorrhageDuration
+                %sModelParams.totalBloodVolume = totalInitialBloodVol - (currentTime/hemorrhageDuration)*deltaBloodVol;  % [v]
+                sStateVec.sVolumes.Vvc = sStateVec.sVolumes.Vvc - deltaBloodVolPerTs; % [v]
+            end
+        end
+        
+        if enableThoracicCavityPressureChange
+            if currentTime < ThoracicCavityPressureChangeDuration
+                sModelParams.Ppl = sModelParams.Ppl + deltaPplPerTs; % [mmHg]
+            end            
+        end
+        
+        if enableRsysUpdate
+            if currentTime < rSysUpdateDuration
+                sModelParams.Rsys = sModelParams.Rsys + deltaRsysPerTs; % [KPa*s/l]
+            end            
+        end
+        
+        if enableHeartElastyUpdate
+            if currentTime < lvfEsUpdateDuration
+                sModelParams.sLvf.Ees = sModelParams.sLvf.Ees + deltaLvfEsPerTs; % [kPa/l]
+            end
+        end
+        
+        %% cardiomodel time-step:
         [sStateVec,sAllInfoVecCurrentTime,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,previousVspt,sModelParams,sSimParams);
         
         if cardioErr
@@ -95,5 +152,6 @@ end
 %CardioPlots(sAllInfoVec,lastIter,'samples',xLimits);
 xLimits = [0,1e3];
 %xLimits = [10,12];
-xLimits = [7,9];
-CardioPlots(sAllInfoVec,lastIter,'sec',xLimits,sSimParams);
+%xLimits = [7,9];
+plotLastOnly = true;
+CardioPlots(sAllInfoVec,lastIter,'sec',xLimits,sSimParams,plotLastOnly);
