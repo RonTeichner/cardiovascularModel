@@ -114,15 +114,17 @@ end
 
 figure;
 plot(tVec,sAllInfoVec.sModelParams.Ppl(startIdx:stopIdx)); title('Ppl'); ylabel('[mmHg]'); xlabel('sec'); grid on;
+limits = [sAllInfoVec.sModelParamsInit.Ppl*ones(1,2)*(1+sSimParams.sParamsSwift.paramMaxAbsChange) ; sAllInfoVec.sModelParamsInit.Ppl*ones(1,2)*(1-sSimParams.sParamsSwift.paramMaxAbsChange)];
+hold on; plot([tVec(1),tVec(end)] , limits(2,:) ,'r'); plot([tVec(1),tVec(end)] , limits(1,:) ,'r');
 
 figure;
 subplot(2,3,4); plot(tVec,sAllInfoVec.sPressures.Plv(startIdx:stopIdx)); title('Plv'); ylabel('[mmHg]'); xlabel('sec'); grid on;
 hold all; plot(tVec,sAllInfoVec.sPressures.Pao(startIdx:stopIdx)); plot(tVec,sAllInfoVec.sPressures.Ppu(startIdx:stopIdx));
-legend('Plv','Pao','Ppu');
+legend('Plv','Pao','Ppu'); ylim([-10,200]);
 %xlim([10,12])
 subplot(2,3,5); plot(tVec,sAllInfoVec.sPressures.Prv(startIdx:stopIdx)); title('Prv'); ylabel('[mmHg]'); xlabel('sec'); grid on;
 hold all; plot(tVec,sAllInfoVec.sPressures.Ppa(startIdx:stopIdx)); plot(tVec,sAllInfoVec.sPressures.Pvc(startIdx:stopIdx));
-legend('Prv','Ppa','Pvc');
+legend('Prv','Ppa','Pvc'); ylim([-10,50]);
 %xlim([10,12])
 maxV = max([sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3;sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3]);
 minV = min([sAllInfoVec.sVolumes.Vlv(startIdx:stopIdx)./1e-3;sAllInfoVec.sVolumes.Vrv(startIdx:stopIdx)./1e-3]);
