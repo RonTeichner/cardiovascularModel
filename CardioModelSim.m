@@ -12,7 +12,7 @@ end
 
 sModelParams = CardioModelParams(article);
 sSimParams.ts = 1e-3; % [sec] It's not a good Idea to have ts more than 1ms because the driver function has a narrow peak 
-sSimParams.simDuration = 480; % [sec]
+sSimParams.simDuration = 60; % [sec]
 sSimParams.VsptSolutionDiffMax = 5; % [mmHg]
 sSimParams.seed = round(rand*1e6);
 sSimParams.initMethod = 'endTenMin'; % {'random','endDiastolic','endTenMinNoDriver','endTenMin'}
@@ -21,7 +21,7 @@ sSimParams.minSimDuration = min(5, sSimParams.simDuration); % if the implicit fu
 heartOn = true;
 
 %% paramsUpdate:
-sSimParams.sParamsSwift.enableAllParamsSwift = true;
+sSimParams.sParamsSwift.enableAllParamsSwift = false;
 sSimParams.sParamsSwift.paramMaxAbsChange = 0.1; % [out of 1, like 10%]
 sSimParams.sParamsSwift.noiseStd = 1e-1; % [from initial val]
 sSimParams.sParamsSwift.iirAlfa = 0.3; % param = (1-alfa)*previous + alfa*noise

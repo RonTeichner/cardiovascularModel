@@ -49,6 +49,7 @@ if ~plotLastOnly
     subplot(2,3,4); plot(tVec,sAllInfoVec.sVolumes.Vlvf(startIdx:stopIdx)./1e-3); xlabel('sec'); ylabel('ml'); title('Vlvf'); grid on;
     subplot(2,3,5); plot(tVec,sAllInfoVec.sVolumes.Vrvf(startIdx:stopIdx)./1e-3); xlabel('sec'); ylabel('ml'); title('Vrvf'); grid on;
     subplot(2,3,6); plot(tVec,sAllInfoVec.sVolumes.Vspt(startIdx:stopIdx)./1e-3); xlabel('sec'); ylabel('ml'); title('Vspt'); grid on;
+    hold all; plot(tVec,sAllInfoVec.sVolumes.VsptViaLinearSolver(startIdx:stopIdx)./1e-3); legend('implicit solver','linear solver');
     
     figure;
     subplot(3,1,1); plot(tVec,sAllInfoVec.sVolumes.debugVsptSolDiff(startIdx:stopIdx)); xlabel('sec'); ylabel('mmHg'); title('Vspt solution err'); grid on;

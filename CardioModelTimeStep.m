@@ -25,7 +25,7 @@ cardioErr = false;
 
 %% Calc Ventricles Pressures
 [sPressures.Plv, sPressures.Prv, sPressures.Pperi, sPressures.Pspt, sPressures.Plvf, sPressures.Prvf,...
-    sVolumes.Vspt, sVolumes.Vlvf, sVolumes.Vrvf, debugVsptSolDiff, errVspt] = ...
+    sVolumes.Vspt, sVolumes.Vlvf, sVolumes.Vrvf, debugVsptSolDiff, errVspt, VsptViaLinearSolver] = ...
     CalcVentriclesPressures(driverFuncVal, sStateVec.sVolumes.Vlv, sStateVec.sVolumes.Vrv, previousVspt,...
     sModelParams, sSimParams);
 
@@ -71,6 +71,7 @@ sAllInfoVec.sVolumes.Vrv = V(6); % [l]
 sAllInfoVec.sVolumes.Vspt = sVolumes.Vspt; % [l]
 sAllInfoVec.sVolumes.Vlvf = sVolumes.Vlvf; % [l]
 sAllInfoVec.sVolumes.Vrvf = sVolumes.Vrvf; % [l]
+sAllInfoVec.sVolumes.VsptViaLinearSolver = VsptViaLinearSolver; % [l]
 sAllInfoVec.sVolumes.debugVsptSolDiff = debugVsptSolDiff; % [mmHg]
 
 sAllInfoVec.sPressures = sPressures; % [mmHg]

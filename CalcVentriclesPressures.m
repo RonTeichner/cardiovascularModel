@@ -1,4 +1,4 @@
-function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sModelParams,sSimParams)
+function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt, VsptViaLinearSolver] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sModelParams,sSimParams)
 % function [Plv, Prv, Pperi, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sModelParams,sSimParams)
 % This function calculates the pressures of the ventricles of the heart
 %
@@ -20,6 +20,8 @@ function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff,
 % debugVsptSolDiff - Vspt solution diff for debug (solver performance
 %   analisys)
 % errVspt - true in case no solution found for Vspt
+% VsptViaLinearSolver - Vspt via linear solver - taylor serie around
+%   previous Vspt value
 % Ron Teichner, 01.12.2018
 
 enableVsptFigure = false;
@@ -33,7 +35,8 @@ Pperi = sModelParams.Pa_to_mmHg*1e3*cardioUtilityFunctions(funcSym,sInputs,sFunc
 useMatlabSolver = isempty(previousVspt);
 VsptRes = 10e-6; VsptSearchMargins = 0.5e-3; % [l]
 [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams);
-
+% linear solver for impression only:
+VsptViaLinearSolver = VsptLinearSolver(previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams);
 
 %% continue with calculations:
 if numel(Vspt) == 0
@@ -178,4 +181,37 @@ if enableVsptFigure
 end
 
 end
+
+function [Vspt] = VsptLinearSolver(previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams)
+% This function solves Vspt via an taylor series approximation
+
+if isempty(previousVspt)
+    Vspt = NaN;
+    return
+end
+e = driverFuncVal;
+
+Ees = sModelParams.sSPT.Ees;
+P0 = sModelParams.sSPT.P0;
+lambda = sModelParams.sSPT.lambda;
+V0 = sModelParams.sSPT.V0;
+alfa_spt = e*Ees + (1-e)*(P0*lambda*exp(lambda*(previousVspt-V0)));
+
+Ees = sModelParams.sLvf.Ees;
+P0 = sModelParams.sLvf.P0;
+lambda = sModelParams.sLvf.lambda;
+V0 = sModelParams.sLvf.V0;
+alfa_lvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(Vlv+previousVspt-V0)));
+
+Ees = sModelParams.sRvf.Ees;
+P0 = sModelParams.sRvf.P0;
+lambda = sModelParams.sRvf.lambda;
+V0 = sModelParams.sRvf.V0;
+alfa_rvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(Vrv-previousVspt-V0)));
+
+deltaVspt = - (previousVspt/(alfa_spt-alfa_lvf-alfa_rvf));
+
+Vspt = deltaVspt + previousVspt;
+end
+
 

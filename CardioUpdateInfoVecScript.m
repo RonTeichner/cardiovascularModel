@@ -9,6 +9,7 @@ sAllInfoVec.sVolumes.Vrv(i) = sAllInfoVecCurrentTime.sVolumes.Vrv;
 sAllInfoVec.sVolumes.Vspt(i) = sAllInfoVecCurrentTime.sVolumes.Vspt;
 sAllInfoVec.sVolumes.Vlvf(i) = sAllInfoVecCurrentTime.sVolumes.Vlvf;
 sAllInfoVec.sVolumes.Vrvf(i) = sAllInfoVecCurrentTime.sVolumes.Vrvf;
+sAllInfoVec.sVolumes.VsptViaLinearSolver(i) = sAllInfoVecCurrentTime.sVolumes.VsptViaLinearSolver;
 sAllInfoVec.sVolumes.debugVsptSolDiff(i) = sAllInfoVecCurrentTime.sVolumes.debugVsptSolDiff;
 sAllInfoVec.sVolumes.totalBloodVol(i) = sAllInfoVec.sVolumes.Vpa(i) + sAllInfoVec.sVolumes.Vpu(i) + sAllInfoVec.sVolumes.Vlv(i) + sAllInfoVec.sVolumes.Vao(i) + sAllInfoVec.sVolumes.Vvc(i) + sAllInfoVec.sVolumes.Vrv(i);
 
