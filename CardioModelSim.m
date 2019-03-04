@@ -149,7 +149,19 @@ while lastIter < nIterForMinSimDuration
         end
         
         %% cardiomodel time-step:
-        [sStateVec,sAllInfoVecCurrentTime,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,previousVspt,sModelParams,sSimParams);
+        if i > 1 % not first iter
+            sPreviousValuesForLinearSolver.vSpt = sAllInfoVec.sVolumes.Vspt(i-1);
+            sPreviousValuesForLinearSolver.gSpt = sAllInfoVec.sPressures.Plvf(i-1) - sAllInfoVec.sPressures.Prvf(i-1);
+            sPreviousValuesForLinearSolver.gLvf = sAllInfoVec.sPressures.Plvf(i-1);
+            sPreviousValuesForLinearSolver.gRvf = sAllInfoVec.sPressures.Prvf(i-1);
+            sPreviousValuesForLinearSolver.previousVlv = sAllInfoVec.sVolumes.Vlv(i-1);
+            sPreviousValuesForLinearSolver.previousVrv = sAllInfoVec.sVolumes.Vrv(i-1);
+            sPreviousValuesForLinearSolver.driverFuncVal = sAllInfoVec.driverFuncVal(i-1);
+        else
+            sPreviousValuesForLinearSolver = [];
+        end
+        
+        [sStateVec,sAllInfoVecCurrentTime,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,previousVspt,sPreviousValuesForLinearSolver,sModelParams,sSimParams);
         
         if cardioErr
             break

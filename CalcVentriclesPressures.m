@@ -1,4 +1,4 @@
-function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt, VsptViaLinearSolver] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sModelParams,sSimParams)
+function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt, VsptViaLinearSolver] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sPreviousValuesForLinearSolver,sModelParams,sSimParams)
 % function [Plv, Prv, Pperi, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff, errVspt] = CalcVentriclesPressures(driverFuncVal,Vlv,Vrv,previousVspt,sModelParams,sSimParams)
 % This function calculates the pressures of the ventricles of the heart
 %
@@ -7,6 +7,8 @@ function [Plv, Prv, Pperi, Pspt, Plvf, Prvf, Vspt, Vlvf, Vrvf, debugVsptSolDiff,
 % Vlv - volume of the left ventricle [l]
 % Vrv - volume of the left ventricle [l]
 % previousVspt - previous value of Vspt, to help the solver [l]
+% sPreviousValuesForLinearSolver - values to have the derivatives at the
+%   previous point
 % sModelParams
 % sSimParams
 %
@@ -35,8 +37,9 @@ Pperi = sModelParams.Pa_to_mmHg*1e3*cardioUtilityFunctions(funcSym,sInputs,sFunc
 useMatlabSolver = isempty(previousVspt);
 VsptRes = 10e-6; VsptSearchMargins = 0.5e-3; % [l]
 [Vspt,Vlvf,Vrvf,Plvf,Prvf,Pspt,debugVsptSolDiff] = VsptSolver(useMatlabSolver,previousVspt,Vlv,Vrv,driverFuncVal,enableVsptFigure,VsptRes,VsptSearchMargins,sModelParams,sSimParams);
+
 % linear solver for impression only:
-VsptViaLinearSolver = VsptLinearSolver(previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams);
+VsptViaLinearSolver = VsptLinearSolver(sPreviousValuesForLinearSolver,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams);
 
 %% continue with calculations:
 if numel(Vspt) == 0
@@ -182,34 +185,60 @@ end
 
 end
 
-function [Vspt] = VsptLinearSolver(previousVspt,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams)
+function [Vspt] = VsptLinearSolver(sPreviousValues,Vlv,Vrv,driverFuncVal,sModelParams,sSimParams)
 % This function solves Vspt via an taylor series approximation
 
-if isempty(previousVspt)
+if isempty(sPreviousValues)
     Vspt = NaN;
     return
 end
-e = driverFuncVal;
 
+previousVspt = sPreviousValues.vSpt;
+e = sPreviousValues.driverFuncVal;
+
+% spt:
 Ees = sModelParams.sSPT.Ees;
 P0 = sModelParams.sSPT.P0;
 lambda = sModelParams.sSPT.lambda;
 V0 = sModelParams.sSPT.V0;
-alfa_spt = e*Ees + (1-e)*(P0*lambda*exp(lambda*(previousVspt-V0)));
+Vd = sModelParams.sSPT.Vd;
+f = P0 * (exp(lambda*(previousVspt-V0)) - 1);
 
+dg_over_dv_at_spt = e*Ees + (1-e)*(P0*lambda*exp(lambda*(previousVspt-V0)));
+dg_over_de_at_spt = Ees*(previousVspt - Vd) - f;
+
+% lvf
 Ees = sModelParams.sLvf.Ees;
 P0 = sModelParams.sLvf.P0;
 lambda = sModelParams.sLvf.lambda;
 V0 = sModelParams.sLvf.V0;
-alfa_lvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(Vlv+previousVspt-V0)));
+previousVlv = sPreviousValues.previousVlv;
+f = P0 * (exp(lambda*(previousVlv + previousVspt - V0)) - 1);
 
+dg_over_dv_at_lvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(previousVlv + previousVspt - V0)));
+dg_over_de_at_lvf = Ees*(previousVlv + previousVspt - Vd) - f;
+
+% rvf
 Ees = sModelParams.sRvf.Ees;
 P0 = sModelParams.sRvf.P0;
 lambda = sModelParams.sRvf.lambda;
 V0 = sModelParams.sRvf.V0;
-alfa_rvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(Vrv-previousVspt-V0)));
+previousVrv = sPreviousValues.previousVrv;
+f = P0 * (exp(lambda*(previousVrv - previousVspt - V0)) - 1);
 
-deltaVspt = - (previousVspt/(alfa_spt-alfa_lvf-alfa_rvf));
+dg_over_dv_at_rvf = e*Ees + (1-e)*(P0*lambda*exp(lambda*(previousVrv - previousVspt - V0)));
+dg_over_de_at_rvf = Ees*(previousVrv - previousVspt - Vd) - f;
+
+deltaVlv = Vlv - previousVlv;
+deltaVrv = Vrv - previousVrv;
+deltaDrive = driverFuncVal - sPreviousValues.driverFuncVal;
+
+asterisk        = dg_over_dv_at_spt - dg_over_dv_at_lvf - dg_over_dv_at_rvf;
+doubleAsterisk  = dg_over_dv_at_lvf*deltaVlv - dg_over_dv_at_rvf*deltaVrv;
+tripleAsterisk  = dg_over_de_at_spt - dg_over_de_at_lvf + dg_over_de_at_rvf;
+gAll = sPreviousValues.gSpt - sPreviousValues.gLvf + sPreviousValues.gRvf;
+
+deltaVspt = (-gAll + doubleAsterisk - deltaDrive*tripleAsterisk)/(asterisk);
 
 Vspt = deltaVspt + previousVspt;
 end

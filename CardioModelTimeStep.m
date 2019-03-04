@@ -1,4 +1,4 @@
-function [sUpdatedStateVec,sAllInfoVec,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,previousVspt,sModelParams,sSimParams)
+function [sUpdatedStateVec,sAllInfoVec,cardioErr] = CardioModelTimeStep(sStateVec,driverFuncVal,previousVspt,sPreviousValuesForLinearSolver,sModelParams,sSimParams)
 % function [sUpdatedStateVec] = CardioModelTimeStep(sStateVec,sParams)
 % This function propagates the Cardiovascular model by a single time-step
 
@@ -10,6 +10,8 @@ function [sUpdatedStateVec,sAllInfoVec,cardioErr] = CardioModelTimeStep(sStateVe
 %   sFlows - flows in which inertsia effects are included (Qav, Qpv)
 % driverFuncVal - the current value of the elastnace of the ventricles
 % previousVspt - previous value of Vspt, to help the solver in CalcVentriclesPressures.m [l]
+% sPreviousValuesForLinearSolver - values to have the derivatives at the
+%   previous point
 % sModelParams - all physiological parameters
 % sSimParams - simulation parameters (for example time-step)
 %
@@ -27,7 +29,7 @@ cardioErr = false;
 [sPressures.Plv, sPressures.Prv, sPressures.Pperi, sPressures.Pspt, sPressures.Plvf, sPressures.Prvf,...
     sVolumes.Vspt, sVolumes.Vlvf, sVolumes.Vrvf, debugVsptSolDiff, errVspt, VsptViaLinearSolver] = ...
     CalcVentriclesPressures(driverFuncVal, sStateVec.sVolumes.Vlv, sStateVec.sVolumes.Vrv, previousVspt,...
-    sModelParams, sSimParams);
+    sPreviousValuesForLinearSolver,sModelParams, sSimParams);
 
 if errVspt
     [sUpdatedStateVec,sAllInfoVec,cardioErr] = deal([],[],true);
